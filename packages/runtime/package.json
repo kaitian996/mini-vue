@@ -1,0 +1,23 @@
+{
+  "name": "@mini/runtime",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "vitest",
+    "build": "tsc",
+    "dev": "tsc ./run/index.ts && node ./run/index.js"
+  },
+  "buildOptions": {
+    "name": "VueRuntime",
+    "formats": [
+      "esm-bundler",
+      "esm-browser",
+      "cjs",
+      "global"
+    ]
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

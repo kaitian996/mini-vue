@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <h3>男人的年龄为：</h3>
+    <h1 id="male">
+    </h1>
+    <h3>女人的年龄为：</h3>
+    <h1 id="female">
+    </h1>
+    <h3>总年龄为：</h3>
+    <h2 id="totle">
+    </h2>
+    <button onclick="increaseAge(1)" id="2">增加男人年龄</button>
+    <button onclick="increaseAge(2)" id="2">增加女人年龄</button>
+</head>
+
+<body>
+    <script src="../dist/VueReactivity.global.js"></script>
+    <script>
+        const { effect, reactive, computed } = VueReactivity
+        const man = reactive({
+            age: 18,
+            sex: 'male',
+        })
+        const female = reactive({
+            age: 19,
+            sex: 'female',
+        })
+        effect(() => {
+            document.getElementById('male').innerHTML = man.age
+        })
+        effect(() => {
+            document.getElementById('female').innerHTML = female.age
+        })
+        const totalAge = computed(() => man.age + female.age)
+        effect(() => {
+            document.getElementById('totle').innerHTML = totalAge.value
+        })
+        const increaseAge = (sex) => {
+            sex === 1 ?
+                man.age++ : female.age++
+            console.log('已增加');
+        }
+    </script>
+</body>
+
+</html>
