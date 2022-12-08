@@ -10,30 +10,31 @@ const packageDir = path.resolve(packagesDir, process.env.TARGET)
 const resolve = p => path.resolve(packageDir, p)
 const packageJson = require(resolve('package.json'))
 const buildOptions = packageJson.buildOptions || {}
-const name = buildOptions.name
+const fileName = path.basename(packageDir)
+const moduleName = buildOptions.name
 
-function createConfig(buildOptions, name) {
+function createConfig(buildOptions, fileName, moduleName) {
     const ouputOptions = {
         "esm-bundler": {
-            file: resolve(`dist/${name}.esm-bundler.js`),
+            file: resolve(`dist/${fileName}.esm-bundler.js`),
             format: 'es'
         },
         "esm-browser": {
-            file: resolve(`dist/${name}.esm-browser.js`),
+            file: resolve(`dist/${fileName}.esm-browser.js`),
             format: 'es'
         },
         "cjs": {
-            file: resolve(`dist/${name}.cjs.js`),
+            file: resolve(`dist/${fileName}.cjs.js`),
             format: 'cjs'
         },
         "global": {
-            file: resolve(`dist/${name}.global.js`),
+            file: resolve(`dist/${fileName}.global.js`),
             format: 'iife'
         }
     }
     return buildOptions.formats.map(format => {
         const output = ouputOptions[format]
-        output.name = name
+        output.name = moduleName
         output.sourcemap = true
         return {
             input: resolve('src/index.ts'),
@@ -49,4 +50,4 @@ function createConfig(buildOptions, name) {
     })
 }
 
-export default createConfig(buildOptions, name)
+export default createConfig(buildOptions, fileName, moduleName)
