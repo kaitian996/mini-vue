@@ -9,42 +9,25 @@
     <h3>男人的年龄为：</h3>
     <h1 id="male">
     </h1>
-    <h3>女人的年龄为：</h3>
-    <h1 id="female">
-    </h1>
-    <h3>总年龄为：</h3>
-    <h2 id="totle">
-    </h2>
-    <button onclick="increaseAge(1)" id="2">增加男人年龄</button>
-    <button onclick="increaseAge(2)" id="2">增加女人年龄</button>
+    <button onclick="increaseAge()" id="1">增加年龄</button>
 </head>
 
 <body>
     <script src="../dist/reactivity.global.js"></script>
     <script>
-        const { effect, reactive, computed } = VueReactivity
+        const { effect, reactive, computed, ref, toRefs } = VueReactivity
+        // const age = ref(18)
         const man = reactive({
-            age: 18,
+            age: 29,
             sex: 'male',
         })
-        const female = reactive({
-            age: 19,
-            sex: 'female',
-        })
+        const { age, sex } = toRefs(man)
+        console.log('age:', age, 'sex:', sex);
         effect(() => {
-            document.getElementById('male').innerHTML = man.age
+            document.getElementById('male').innerHTML = age.value
         })
-        effect(() => {
-            document.getElementById('female').innerHTML = female.age
-        })
-        const totalAge = computed(() => man.age + female.age)
-        effect(() => {
-            document.getElementById('totle').innerHTML = totalAge.value
-        })
-        const increaseAge = (sex) => {
-            sex === 1 ?
-                man.age++ : female.age++
-            console.log('已增加');
+        function increaseAge() {
+            man.age++
         }
     </script>
 </body>

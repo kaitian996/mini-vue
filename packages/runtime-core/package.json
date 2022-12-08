@@ -1,18 +1,19 @@
 {
-  "name": "@mini/reactivity",
+  "name": "@mini/runtime-core",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/runtime-core.esm-bundler.js",
+  "module": "dist/runtime-core.esm-bundler.js",
+  "types": "dist/runtime-core/index.d.ts",
   "scripts": {
     "test": "vitest"
   },
   "buildOptions": {
-    "name": "VueReactivity",
+    "name": "VueRuntimeCore",
     "formats": [
       "esm-bundler",
       "esm-browser",
-      "cjs",
-      "global"
+      "cjs"
     ]
   },
   "keywords": [],

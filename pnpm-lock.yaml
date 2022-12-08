@@ -20,6 +20,12 @@ importers:
       typescript: registry.npmmirror.com/typescript/4.9.3
       vitest: registry.npmmirror.com/vitest/0.25.3
 
+  packages/runtime-dom:
+    specifiers:
+      '@mini/runtime-core': workspace:^1.0.0
+    dependencies:
+      '@mini/runtime-core': link:../runtime-core
+
 packages:
 
   registry.npmmirror.com/@esbuild/android-arm/0.15.18:

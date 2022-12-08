@@ -1,15 +1,13 @@
 {
-  "name": "@mini/runtime",
+  "name": "@mini/runtime-dom",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "vitest",
-    "build": "tsc",
-    "dev": "tsc ./run/index.ts && node ./run/index.js"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "buildOptions": {
-    "name": "VueRuntime",
+    "name": "VueRuntimeDOM",
     "formats": [
       "esm-bundler",
       "esm-browser",
@@ -19,5 +17,8 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "@mini/runtime-core": "workspace:^1.0.0"
+  }
 }

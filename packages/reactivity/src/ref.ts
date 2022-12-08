@@ -3,7 +3,7 @@ export function ref<T>(target: T) {
     const wrapper = {
         value: target
     }
-    Object.defineProperty(target, '__v_isRef', {
+    Object.defineProperty(wrapper, '__v_isRef', {
         value: true
     })
     return reactive(wrapper)
@@ -22,7 +22,7 @@ export function toRef(target: object, key: string) {
 export function toRefs(target: object) {
     const result = {} as any
     for (const key in target) {
-        result[key] = (target as any)[key]
+        result[key] = toRef(target, key)
     }
     return result
 }
