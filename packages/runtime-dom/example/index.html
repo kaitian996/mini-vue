@@ -12,10 +12,13 @@
     <div id="app"></div>
     <script src="../dist/runtime-dom.global.js"></script>
     <script>
-        const { createApp, h, rendererOptions } = VueRuntimeDOM
+        const { createApp, h } = VueRuntimeDOM
         const App = {
+            setup(props, context) {
+                console.log('setup', props, context)
+            },
             render() {
-                h('div', {}, 'aa')
+                return h('div', { style: { color: 'blue' } }, h('span', { style: { color: 'red' } }, 'hello span'))
             }
         }
         createApp(App, { name: 'document' }).mount('#app')

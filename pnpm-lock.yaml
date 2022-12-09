@@ -4,6 +4,7 @@ importers:
 
   .:
     specifiers:
+      '@mini/share': workspace:^1.0.0
       '@rollup/plugin-json': '4'
       '@rollup/plugin-node-resolve': '11'
       execa: '4'
@@ -12,6 +13,7 @@ importers:
       typescript: ^4.9.3
       vitest: ^0.25.3
     dependencies:
+      '@mini/share': link:packages/share
       '@rollup/plugin-json': registry.npmmirror.com/@rollup/plugin-json/4.1.0_rollup@2.38.5
       '@rollup/plugin-node-resolve': registry.npmmirror.com/@rollup/plugin-node-resolve/11.2.1_rollup@2.38.5
       execa: registry.npmmirror.com/execa/4.1.0

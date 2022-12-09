@@ -1,0 +1,21 @@
+{
+  "name": "@mini/share",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "buildOptions": {
+    "name": "VueShare",
+    "formats": [
+      "esm-bundler",
+      "esm-browser",
+      "cjs",
+      "global"
+    ]
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

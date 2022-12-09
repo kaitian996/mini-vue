@@ -1,8 +1,9 @@
 import { nodeOps } from './nodeOps'
 import { patchProp } from './patchProp'
-import { createRenderer } from '@mini/runtime-core'
+import { createRenderer, h } from '@mini/runtime-core'
+import { extend } from '@mini/share'
 
-const rendererOptions = Object.assign({ patchProp }, nodeOps)
+const rendererOptions = extend({ patchProp }, nodeOps)
 //
 export function createApp(rootComponent: any, rootProps: any = null) {
     const app: any = createRenderer(rendererOptions).createApp(rootComponent, rootProps)
@@ -19,3 +20,4 @@ export function createApp(rootComponent: any, rootProps: any = null) {
 export {
     rendererOptions
 }
+export * from '@mini/runtime-core'

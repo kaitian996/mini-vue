@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@mini/share": "workspace:^1.0.0",
     "@rollup/plugin-json": "4",
     "@rollup/plugin-node-resolve": "11",
     "execa": "4",
