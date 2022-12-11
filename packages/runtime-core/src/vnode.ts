@@ -21,7 +21,7 @@ export function createVNode(type: any, props: any, children: any = null) {
 function normalizeChildren(vnode, children) {
     let type = 0
     if (children === null) { //
-        type = ShapeFlags.NULL
+        type = ShapeFlags.NULL_CHILDREN
     } else if (isArray(children)) {
         type = ShapeFlags.ARRAY_CHILDREN
     } else {
