@@ -76,7 +76,7 @@ function finisheComponentSetup(instance) {
         //现在Component身上有render了，再赋值给实例
         instance.render = Component.render
     }
-    console.log('完成结果后的', instance?.render?.toString())
+    console.log('完成结果后的render函数', instance?.render?.toString())
     //对vue2.0API做兼容处理
     //applyOptions
 }

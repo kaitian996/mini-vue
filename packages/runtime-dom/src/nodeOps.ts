@@ -16,6 +16,7 @@ export const nodeOps = {
     //查
     querySelector: (selector: string) => document.querySelector(selector),
     setElementText: (element: Element, text: string) => element.textContent = text,
+    nextSibling: (node: Element) => node.nextSibling,
     //文本操作
     createText: (text: string) => document.createTextNode(text),
     setText: (node: Node, text: string) => node.nodeValue = text

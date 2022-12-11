@@ -3,6 +3,7 @@ type EffectOptions = {
     lazy?: boolean;
 }
 export let activeEffect: any
+let uid: number = 0
 export function effect(fn: Function, options?: EffectOptions) {
     let parent
     const effectFn: any = () => {
@@ -15,6 +16,7 @@ export function effect(fn: Function, options?: EffectOptions) {
     }
     effectFn.deps = []
     effectFn.options = options
+    effectFn.id = uid++ //保存一个id，为后续effectFn排序的时候比较大小使用
     if (!options?.lazy) {
         effectFn()
     }
@@ -45,6 +47,8 @@ export function track(target: object, key: string | symbol) {
     deps.add(activeEffect)
     //将依赖添加到数组中
     activeEffect.deps.push(deps)
+    console.log('触发track');
+
 }
 
 export function trigger(taget: object, key: string | symbol) {
@@ -64,6 +68,8 @@ export function trigger(taget: object, key: string | symbol) {
             effectFn()
         }
     })
+    console.log('触发trigger');
+
 }
 
 function cleanup(effectFn: any) {

@@ -21,3 +21,4 @@ export {
     rendererOptions
 }
 export * from '@mini/runtime-core'
+export * from '@mini/reactivity'
