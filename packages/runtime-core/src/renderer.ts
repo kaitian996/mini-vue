@@ -37,6 +37,8 @@ export function createRenderer(rendererOptions: any) {
                 const nextTree = instance.render.call(proxyToUse, proxyToUse)
                 console.log('oldtree and newtree', prevTree, nextTree)
                 patch(prevTree, nextTree, container)
+                //打完补丁之后,应该会将新的nextTree赋给instance.subTree
+                // instance.subTree =nextTree
             }
         }, {
             scheduler: queueJob
@@ -230,6 +232,7 @@ export function createRenderer(rendererOptions: any) {
         createApp: createAppAPI(render)
     }
 }
+
 /**
  * createRender是总的方法，目的是创建一个渲染器,传入参数时不同平台的nodeOptions,包含了平台的增删改查等等方法
  * 返回一个对象 对象有一个createApp方法，这个方法接受两个参数，一个rootComponent，一个rootProps
@@ -237,26 +240,51 @@ export function createRenderer(rendererOptions: any) {
  * 如rootComponent rootProps contanier
  * 最重要的是mount方法，这个mount方法会调用
  * (1) createVNode,将传进来的rootComponent和rootProps转化为VNode
- * (2) 将这个VNode 和container传入render方法，进行渲染
- * (3) 判断render的VNode是什么类型：
- *  ---如果是组件，就走processComponent逻辑：
- *          ---如果是初次渲染，就走mountComponent逻辑：
- *              (1) 首先会生成组件实例
- *              (2) 配置好组件的实例，如组件实例的属性，并且给组件的render函数做代理，确保组件的render函数与reactivity系统挂钩
- *              (3) 和响应式系统挂钩之后，就可以用effect传入需要的逻辑，如果是挂载，就直接挂载，如果是更新，就执行更新逻辑
+ * (2) 将这个VNode 和container传入render方法，render调用patch(null,vnode,container)进行渲染
  */
 
-/**
- * 第一次是组件，所以mountComponent,然后会将subtree 进行patch
- * subtree是vnode,且type不为component所以会mountElment，于是会创建真实元素，创建完第一层之后，会接着创建儿子，进行儿子迭代循环
- * 如果儿子是普通的Elment的vnode,就会patch普通元素，又进入mountElment ,进行下一层的迭代
- * 如果儿子是component的vnode,暂时还未将它转化为VNode，所以是一个普通的对象，后续应该是将它转化为VNode，调用patch，进行组件的渲染
- */
 
 /**
  * patch 中转函数 通过传入的参数不同，派发不同的更新,
- * 参数你n1、n2、container
+ * 参数n1、n2、container
  * n1:oldVnode n2:newVnode container:需要挂载的容器
- * 逻辑
+ * ==>patch 逻辑<==
+ * 提取新的n2的shapeFlag和type
+ * 
+ * (1)如果type是TEXT,则进入processText流程
+ * 否则，则判断shapeflag是什么类型
+ * 
+ * (2)命中component，则进入processComponent
+ *  --如果n1是null，则说明是新挂载节点，进入mountComponent
+ *      --先根据Vnode创建一个instance实例，然后再设置实例的属性，然后setupComponent，在这里面先初始化各种props等等，再执行setup函数，将执行结果保存进实例的setupState，
+ *        并且会将render函数挂载到实例身上，最终一个完整的实例属性会被创建出来，最终，会创建一个setupRenderEffect,这个effect就是一个组件的依赖(vue3的依赖是组件级的依赖)，
+ *  ==> effect的中函数，根据组件的isMounted属性来判断是否已经被挂载
+ *          --如果没有被挂载，则会执行组件的render函数，生成一颗subTree,然后再调用patch(null,subTree,container)
+ *          --如果已经被挂载，则会重新通过render函数生成新的subTree,然后进行patch(prevTree, nextTree, container),patch完成后，更新实例的subTree
+ *  --如果不是则需要patch
+ * 
+ * (3)命中element，则进入processElement
+ * --如果n1是null，则说明是新挂载节点,进入mountElement
+ *      --根据其中的type,创建对应的dom元素，并挂载到这个vnode身上，然后patchProps,判断children,
+ *        如果是单纯的文本，就创建文本，就设置文本，
+ *        如果不是文本，是数组，就调用mountChildren
+ *        --循环数组，如果是文本就创建文本VNode，然后调用pach(null, child, container),就进行了深度递归，最终构建出一颗完整的dom树，根节点的VNode保存了完整的一个VNode的树，就完成了Vnode到dom树映射
+ * --如果n1不为null,则需要进行patchElement
+ *      --n1为旧的树，n2为新树，并且两者的type一定相同，因为如果不同，在patch的时候就会卸载掉n1,然后将n1置为null,进入新的mount流程
+ *        先patchProps，将属性更新
+ *        再patchChildren，更新儿子
+ *        --patchChildren进行比较,旧的有三种情况的儿子：null,text,array,新的有三种情况的儿子：null,text,array
+ *         ① 新的为null:
+ *          --旧的为null:啥也不做
+ *          --旧的为text:设置文本即可
+ *          --旧的为array:卸载掉数组中的元素
+ *         ② 新的为文本：
+ *          --旧的为null：设置文本
+ *          --旧的为文本:更新文本
+ *          --旧的为array：卸载旧的数组元素，然后设置文本
+ *         ③ 新的为array:
+ *          --旧的为null:调用mountChildren，将新的数组中的所有VNode转化为真实dom
+ *          --旧的为text:置空文本，mountChildren
+ *          --旧的为array:diff算法
  *  
  */
