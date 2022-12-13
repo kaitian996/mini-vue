@@ -17,13 +17,13 @@
             setup(props, context) {
                 const state = ref(true)
                 const fn = () => {
-                    state.value = false
+                    state.value = !state.value
                 }
                 // setTimeout(() => state.value = false, 3000)
                 return () => {
                     return state.value ?
-                        h('div', { style: { color: 'blue' } }, h('a', {}, [h('p', '1'), h('p', '2'), h('p', '3')])) :
-                        h('div', { style: { color: 'red' } })
+                        h('div', { style: { color: 'blue' }, onClick: fn }, [h('p', '1'), h('p', '2'), h('p', '3')]) :
+                        h('div', { style: { color: 'red' }, onClick: fn }, [h('p', '1'), h('p', '2'), h('p', '3'), h('p', '5')])
                 }
             }
         }

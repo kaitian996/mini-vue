@@ -30,15 +30,14 @@ export function createRenderer(rendererOptions: any) {
                 instance.isMounted = true
             } else { //已经挂载了
                 //更新逻辑
-                console.log('更新了')
                 //之前保存的树
                 const prevTree = instance.subTree
                 const proxyToUse = instance.proxy
                 const nextTree = instance.render.call(proxyToUse, proxyToUse)
-                console.log('oldtree and newtree', prevTree, nextTree)
+                console.log('更新了,oldtree and newtree', prevTree, nextTree)
                 patch(prevTree, nextTree, container)
                 //打完补丁之后,应该会将新的nextTree赋给instance.subTree
-                // instance.subTree =nextTree
+                instance.subTree = nextTree
             }
         }, {
             scheduler: queueJob
@@ -117,7 +116,124 @@ export function createRenderer(rendererOptions: any) {
         }
     }
     //diff算法
-    const patchKeyedChildren = (n1, n2, container) => {
+    const patchKeyedChildren = (c1, c2, container) => {
+        //Vue3对特殊情况优化
+        let i: number = 0 //默认从头开始对比
+        let e1 = c1.length - 1
+        let e2 = c2.length - 1
+        //sync from start 从头开始一个一个比较，遇到不同的就停止了
+        while (i <= e1 && i <= e2) { //循环最短的一个数组
+            const n1 = c1[i]
+            const n2 = c2[i]
+            if (isSameVNodeType(n1, n2)) {
+                patch(n1, n2, container)
+            } else {
+                break
+            }
+            i++
+        }
+        //sync from end
+        while (i <= e1 && i <= e2) {
+            const n1 = c1[e1]
+            const n2 = c2[e2]
+            if (isSameVNodeType(n1, n2)) {
+                patch(n1, n2, container)
+            } else {
+                break
+            }
+            e1--
+            e2--
+        }
+        console.log(`双端比较后=>i=${i},e1=${e1},e2=${e2}`)
+        //比较之后，有一方完全比完，
+        //common squeqe
+        /**
+         * i指向第一个不相同的位置，如果i比e1大，说明从i到e2都需要挂载，如果i比e2大，说明i到e1都需要卸载，不然就是乱序情况
+         * 
+         * 
+         */
+        if (i > e1 && i <= e2) { //新的多，老的少
+            console.log('新的多，老的少，需要挂载新的');
+            //如果i>e1,说明老的少，新的多
+            /**
+             * (a,b)
+             * (a,b),c
+             * 此时i=2,e1=1,e2=2所以需要新增
+             *   (b,c)
+             * a,(b,c)
+             * 此时i=0,e1=-1,e2=0
+             */
+            //表示有新增的部分
+            //从i到e2添加，
+            const nextPos = e2 + 1
+            const anchor = nextPos < c2.length ? c2[nextPos].el : null//如果比它小，就是向前添加
+            while (i <= e2) {
+                patch(null, c2[i], container, anchor) //只是向后添加
+                i++
+            }
+        }
+        else if (i > e2 && i <= e1) { //老的多新的少
+            console.log('新的少，老的多，需要卸载旧的')
+            /**
+             * (a,b),c
+             * (a,b)
+             * 此时i=2,e1=2,e2=1,此时i指向的是c1的多出来的部分，i到e1多出来的部分都得删除
+             * c,(a,b)
+             * (a,b)
+             * 此时i=0,e1=0,e2=-1,从i到e1都得删除
+             */
+            while (i <= e1) {
+                unmount(c1[i])
+                i++
+            }
+        }
+        else { //乱序比较,尽可能复用，用新的元素做成一个映射表，
+            /**
+             *  (a,b),c,d,(e,f)
+             *  (a,b),d,c,(e,f)
+             */
+            console.log('乱序比较')
+            let s1 = i
+            let s2 = i
+            const keyToNewIndexMap = new Map()
+            for (let i = s2; i <= e2; i++) { //给新的做一个映射表，后续老的在新的里面查
+                const childVNode = c2[i]
+                keyToNewIndexMap.set(childVNode.key, i)
+            }
+            const toBePatched = e2 - s2 + 1 //所以的个数
+            const newIndexToOldIndexMap = new Array(toBePatched).fill(0)
+            //去老的里面查找，有没有复用的
+            for (let i = s1; i <= e1; i++) {
+                const oldVNode = c1[i]
+                const newIndex = keyToNewIndexMap.get(oldVNode.key)
+                if (newIndex === undefined) { //老的不在新的里面
+                    unmount(oldVNode)
+                } else { //找到了同一个key的元素,补丁，新老的比对，比较完毕后再移动位置
+                    //新的和旧的索引关系
+                    newIndexToOldIndexMap[newIndex - s2] = i + 1
+                    patch(oldVNode, c2[i], container)
+                }
+            }
+            //最后就是移动节点，并且将新增的节点插入
+            for (let i = toBePatched - 1; i >= 0; i--) {
+                const currentIndex = i + s2
+                const child = c2[currentIndex] //从后往前，找到新的列表的每一项
+                const anchor = currentIndex + 1 < c2.length ? c2[currentIndex + 1].el : null
+                if (newIndexToOldIndexMap[i] === 0) { //为0说明没有被patch过,即为新增的
+                    patch(null, child, anchor)
+                } else { //patch过，移动位置
+                    //可行，但是会将所有的需要将所有的节点都操作一遍 [4,3]
+                    //c1 [1,2,3,4,5,6,7]
+                    //c2 [1,2,5,3,4,6,7]
+                    /**
+                     * 变化了的只有3,4,5-->5,3,4
+                     * 找到最长递增子序列
+                     */
+                    console.log('aaa', child.el, anchor)
+                    hostInsert(child.el, container, anchor) //s1-e2都已经更新了自己的VNode，根据新的需要比较的列表来依次移动
+                }
+            }
+        }
 
     }
     //更新儿子
@@ -162,8 +278,10 @@ export function createRenderer(rendererOptions: any) {
                 hostSetElementText(container, c2)
                 console.log('新的为文本，老的为数组，卸载数组', c1, c2)
             } else { //老的为文本
-                hostSetElementText(container, c2)
-                console.log('新的为文本，老的为文本,设置文本', c1, c2)
+                if (c1 !== c2) { //如果两次文本不同
+                    hostSetElementText(container, c2)
+                    console.log('新的为文本，老的为文本,设置文本', c1, c2)
+                }
             }
         }
     }
@@ -287,4 +405,4 @@ export function createRenderer(rendererOptions: any) {
  *          --旧的为text:置空文本，mountChildren
  *          --旧的为array:diff算法
  *  
- */
+ */ 
