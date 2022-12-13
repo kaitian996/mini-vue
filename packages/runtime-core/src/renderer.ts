@@ -215,6 +215,8 @@ export function createRenderer(rendererOptions: any) {
                 }
             }
             //最后就是移动节点，并且将新增的节点插入
+            const increasingNewIndexSequence = getSequence(newIndexToOldIndexMap) //连续的新的索引序列
+            let j = increasingNewIndexSequence.length - 1
             for (let i = toBePatched - 1; i >= 0; i--) {
                 const currentIndex = i + s2
                 const child = c2[currentIndex] //从后往前，找到新的列表的每一项
@@ -229,8 +231,12 @@ export function createRenderer(rendererOptions: any) {
                      * 变化了的只有3,4,5-->5,3,4
                      * 找到最长递增子序列
                      */
-                    console.log('aaa', child.el, anchor)
-                    hostInsert(child.el, container, anchor) //s1-e2都已经更新了自己的VNode，根据新的需要比较的列表来依次移动
+                    if (i !== increasingNewIndexSequence[j]) {
+                        hostInsert(child.el, container, anchor) //s1-e2都已经更新了自己的VNode，根据新的需要比较的列表来依次移动
+                        console.log('move', child.el);
+                    } else {
+                        j-- //跳过不需要一点的元素
+                    }
                 }
             }
         }
@@ -349,6 +355,47 @@ export function createRenderer(rendererOptions: any) {
     return {
         createApp: createAppAPI(render)
     }
+}
+//最长递增子序列算法
+function getSequence(arr: number[]): number[] {
+    const p = arr.slice();
+    const result = [0];
+    let i, j, u, v, c;
+    const len = arr.length;
+    for (i = 0; i < len; i++) {
+        const arrI = arr[i];
+        if (arrI !== 0) {
+            j = result[result.length - 1];
+            if (arr[j] < arrI) {
+                p[i] = j;
+                result.push(i);
+                continue;
+            }
+            u = 0;
+            v = result.length - 1;
+            while (u < v) {
+                c = (u + v) >> 1;
+                if (arr[result[c]] < arrI) {
+                    u = c + 1;
+                } else {
+                    v = c;
+                }
+            }
+            if (arrI < arr[result[u]]) {
+                if (u > 0) {
+                    p[i] = result[u - 1];
+                }
+                result[u] = i;
+            }
+        }
+    }
+    u = result.length;
+    v = result[u - 1];
+    while (u-- > 0) {
+        result[u] = v;
+        v = p[v];
+    }
+    return result;
 }
 
 /**
