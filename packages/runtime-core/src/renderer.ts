@@ -2,6 +2,7 @@ import { effect } from '@mini/reactivity'
 import { ShapeFlags } from '@mini/share'
 import { createAppAPI } from './apiCreateApp'
 import { createComponentInstance, setupComponent } from './component'
+import { shouldUpdateComponent } from './componentRenderUtils'
 import { queueJob } from './scheduler'
 import { isSameVNodeType, normalizeVNode, TEXT } from './vnode'
 
@@ -30,7 +31,15 @@ export function createRenderer(rendererOptions: any) {
                 instance.isMounted = true
             } else { //已经挂载了
                 //更新逻辑
-                //之前保存的树
+                const { next, vnode } = instance;
+                // 如果有 next 的话， 说明需要更新组件的数据（props，slots 等）
+                // 先更新组件的数据，然后更新完成后，在继续对比当前组件的子元素
+                if (next) {
+                    console.log('有next', next, instance);
+                    next.el = vnode.el;
+                    updateComponentPreRender(instance, next)
+                }
+                //更新元素，之前保存的树
                 const prevTree = instance.subTree
                 const proxyToUse = instance.proxy
                 const nextTree = instance.render.call(proxyToUse, proxyToUse)
@@ -44,6 +53,14 @@ export function createRenderer(rendererOptions: any) {
         })
     }
     //----------处理组件-----------------------------------
+    const updateComponentPreRender = (instance, next) => {
+        //实例：instance next :下一次的VNode
+        next.component = instance
+        instance.vnode = next
+        instance.next = null
+        //更新组件的props
+        instance.props = next.props
+    }
     //初始化
     const mountComponent = (initialVNode, container) => {
         //一定是STATEFUL_COMPONENT
@@ -55,11 +72,30 @@ export function createRenderer(rendererOptions: any) {
         //3、创建effect，让render执行
         setupRenderEffect(instance, container)
     }
+    const patchComponent = (n1, n2, container) => {
+        // 更新组件实例引用
+        const instance = (n2.component = n1.component)
+        // 先看看这个组件是否应该更新
+        if (shouldUpdateComponent(n1, n2)) {
+            // 那么 next 就是新的 vnode 了（也就是 n2）
+            instance.next = n2;
+            // 调用 update 再次更新调用 patch 逻辑
+            // 在update 中调用的 next 就变成了 n2了
+            instance.update()
+        } else {
+            console.log(`组件不需要更新: ${instance}`);
+            // 不需要更新的话，那么只需要覆盖下面的属性即可
+            n2.component = n1.component;
+            n2.el = n1.el;
+            instance.vnode = n2;
+        }
+    }
     const processComponent = (n1, n2, container) => {
         if (n1 === null) { //初始化
             mountComponent(n2, container)
-        } else {
-            console.log('更新组件');
+        } else { //更新组件
+            patchComponent(n1, n2, container)
+            console.log('更新组件')
         }
     }
 
@@ -126,7 +162,8 @@ export function createRenderer(rendererOptions: any) {
             const n1 = c1[i]
             const n2 = c2[i]
             if (isSameVNodeType(n1, n2)) {
-                patch(n1, n2, container)
+                //两个文本更新的时候会有一个bug
+                patch(normalizeVNode(n1), normalizeVNode(n2), container)
             } else {
                 break
             }
@@ -137,7 +174,8 @@ export function createRenderer(rendererOptions: any) {
             const n1 = c1[e1]
             const n2 = c2[e2]
             if (isSameVNodeType(n1, n2)) {
-                patch(n1, n2, container)
+                //两个文本更新的时候会有一个bug
+                patch(normalizeVNode(n1), normalizeVNode(n2), container)
             } else {
                 break
             }
@@ -314,6 +352,10 @@ export function createRenderer(rendererOptions: any) {
     const processText = (n1, n2, container) => {
         if (n1 === null) { //创建文本，挂载
             hostInsert(n2.el = hostCreateText(n2.children), container)
+        } else {
+            if (n2.children !== n1.children) {
+                hostSetElementText(container, n2.children)
+            }
         }
     }
     /**

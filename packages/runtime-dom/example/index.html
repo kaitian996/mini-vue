@@ -15,8 +15,10 @@
         const { createApp, h, reactive, ref } = VueRuntimeDOM
         const Admin = {
             setup(props, context) {
-                return () => {
-                    return h('p', { key: '1' }, ['我是儿子', props.state])
+                console.log('子组件的props',props);
+                return (proxy) => {
+                    console.log('proxy',proxy)
+                    return h('p', { key: '1' }, [String(proxy.state)])
                 }
             }
         }
@@ -56,7 +58,7 @@
                 }
             }
         }
-        createApp(App, { name: 'document' }).mount('#app')
+        createApp(App).mount('#app')
     </script>
 </body>
 
