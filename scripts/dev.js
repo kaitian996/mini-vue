@@ -1,7 +1,7 @@
 const execa = require('execa')
 const fs = require('fs')
 const agrs = process.argv.slice(2)
-const package = agrs[0]
+const package = agrs[0] || 'runtime-dom'
 
 async function run() {
     if (fs.statSync(`packages/${package}`).isDirectory()) {

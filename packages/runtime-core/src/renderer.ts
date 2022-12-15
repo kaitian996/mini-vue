@@ -59,7 +59,7 @@ export function createRenderer(rendererOptions: any) {
         if (n1 === null) { //初始化
             mountComponent(n2, container)
         } else {
-
+            console.log('更新组件');
         }
     }
 

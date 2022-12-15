@@ -13,6 +13,13 @@
     <script src="../dist/runtime-dom.global.js"></script>
     <script>
         const { createApp, h, reactive, ref } = VueRuntimeDOM
+        const Admin = {
+            setup(props, context) {
+                return () => {
+                    return h('p', { key: '1' }, ['我是儿子', props.state])
+                }
+            }
+        }
         const App = {
             setup(props, context) {
                 const state = ref(true)
@@ -22,8 +29,30 @@
                 // setTimeout(() => state.value = false, 3000)
                 return () => {
                     return state.value ?
-                        h('div', { style: { color: 'blue' }, onClick: fn }, [h('p', '1'), h('p', '2'), h('p', '3')]) :
-                        h('div', { style: { color: 'red' }, onClick: fn }, [h('p', '1'), h('p', '2'), h('p', '3'), h('p', '5')])
+                        h('div', { style: { color: 'red' }, onClick: fn },
+                            [
+                                h('p', { key: '1' }, '1'),
+                                h('p', { key: '2' }, '2'),
+                                h('p', { key: '3' }, '3'),
+                                h('p', { key: '4' }, '4'),
+                                h('p', { key: '5' }, '5'),
+                                h('p', { key: '6' }, '6'),
+                                h('p', { key: '7' }, '7'),
+                                h('p', { key: '8' }, '8'),
+                                h(Admin, { state: state.value }),
+                            ]) :
+                        h('div', { style: { color: 'blue' }, onClick: fn },
+                            [
+                                h('p', { key: '1' }, '1'),
+                                h('p', { key: '2' }, '2'),
+                                h('p', { key: '6' }, '6'),
+                                h('p', { key: '5' }, '5'),
+                                h('p', { key: '3' }, '3'),
+                                h('p', { key: '4' }, '4'),
+                                h('p', { key: '7' }, '7'),
+                                h('p', { key: '8' }, '8'),
+                                h(Admin, { state: state.value }),
+                            ])
                 }
             }
         }
