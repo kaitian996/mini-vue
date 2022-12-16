@@ -1,6 +1,7 @@
 import { effect } from '@mini/reactivity'
 import { ShapeFlags } from '@mini/shared'
 import { createAppAPI } from './apiCreateApp'
+import { invokerArrayFns } from './apiLifecycle'
 import { createComponentInstance, setupComponent } from './component'
 import { shouldUpdateComponent } from './componentRenderUtils'
 import { queueJob } from './scheduler'
@@ -23,13 +24,24 @@ export function createRenderer(rendererOptions: any) {
         instance.update = effect(function componentEffect() { //每个组件都有一个effect，vue3是组件级更新，数据变化会重新执行对应的effect
             if (!instance.isMounted) { //没有挂载
                 //初次渲染
+                const { bm, m } = instance
+                if (bm) { //beforeMounte
+                    invokerArrayFns(bm)
+                }
                 const proxyToUse = instance.proxy
                 //需要渲染的子树
                 const subTree = instance.subTree = instance.render.call(proxyToUse, proxyToUse)
                 console.log('subTree', subTree);
                 patch(null, subTree, container)
                 instance.isMounted = true
+                if (m) { //要求子组件完成后调用自己 
+                    invokerArrayFns(m)
+                }
             } else { //已经挂载了
+                const { bu, u } = instance //执行生命周期
+                if (bu) {
+                    invokerArrayFns(bu)
+                }
                 //更新逻辑
                 const { next, vnode } = instance;
                 // 如果有 next 的话， 说明需要更新组件的数据（props，slots 等）
@@ -47,6 +59,10 @@ export function createRenderer(rendererOptions: any) {
                 patch(prevTree, nextTree, container)
                 //打完补丁之后,应该会将新的nextTree赋给instance.subTree
                 instance.subTree = nextTree
+                //update
+                if (u) {
+                    invokerArrayFns(u)
+                }
             }
         }, {
             scheduler: queueJob

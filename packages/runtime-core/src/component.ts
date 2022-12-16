@@ -36,6 +36,9 @@ export function setupComponent(instance) {
     setupStatefulComponent(instance) //执行setup函数
 
 }
+export let currentInstance: null | object = null  //当前的实例对象
+export const setCurrentInstance = instance => currentInstance = instance //设置实例
+export const getCurrentInstance = () => currentInstance //在setup中获取当前实例
 //解析状态,调用setup和render函数
 function setupStatefulComponent(instance) {
     //代理,传递给render函数的参数
@@ -46,8 +49,11 @@ function setupStatefulComponent(instance) {
     //-------处理没有setup、render情况-----
     if (setup) {
         const setupContext = createSetupContext(instance)
+        //调用setup之前，暴露当前的实例
+        currentInstance = instance
         //调用setup,并接受返回值
         const setupResult = setup(instance.props, setupContext)
+        currentInstance = null //执行完后置为空
         //判断setup返回值
         handleSetupResult(instance, setupResult)
     } else {

@@ -30,6 +30,7 @@ pnpm run dev <package> #传入具体的包名，会单独打包
 - [x] 支持 element 类型
 - [x] 初始化 props
 - [x] setup 可获取 props 和 context
+- [x] setup 生命周期钩子
 - [x] 支持 proxy
 - [x] 可以在 render 函数中获取 setup 返回的对象
 - [x] nextTick 的实现
