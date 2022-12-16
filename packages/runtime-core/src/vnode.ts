@@ -1,4 +1,4 @@
-import { isArray, isObject, isString, ShapeFlags } from "@mini/share"
+import { isArray, isObject, isString, ShapeFlags } from "@mini/shared"
 
 export function createVNode(type: any, props: any, children: any = null) {
     //根据type区分

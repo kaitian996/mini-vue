@@ -15,9 +15,10 @@
         const { createApp, h, reactive, ref } = VueRuntimeDOM
         const Admin = {
             setup(props, context) {
-                console.log('子组件的props',props);
-                return (proxy) => {
-                    console.log('proxy',proxy)
+                console.log('子组件的props', props);
+                return function a(proxy) {
+                    console.log('this', this);
+                    console.log('proxy', proxy)
                     return h('p', { key: '1' }, [String(proxy.state)])
                 }
             }

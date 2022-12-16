@@ -1,5 +1,5 @@
 import { effect } from '@mini/reactivity'
-import { ShapeFlags } from '@mini/share'
+import { ShapeFlags } from '@mini/shared'
 import { createAppAPI } from './apiCreateApp'
 import { createComponentInstance, setupComponent } from './component'
 import { shouldUpdateComponent } from './componentRenderUtils'

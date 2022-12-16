@@ -1,4 +1,4 @@
-import { isObject } from "@mini/share";
+import { isObject } from "@mini/shared";
 import { createVNode, isVNode } from "./vnode";
 
 export function h(type, propsOrChildren, children) {

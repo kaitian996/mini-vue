@@ -1,7 +1,7 @@
 import { nodeOps } from './nodeOps'
 import { patchProp } from './patchProp'
 import { createRenderer, h } from '@mini/runtime-core'
-import { extend } from '@mini/share'
+import { extend } from '@mini/shared'
 
 const rendererOptions = extend({ patchProp }, nodeOps)
 //

@@ -1,4 +1,4 @@
-import { isFunction, isObject, ShapeFlags } from "@mini/share"
+import { isFunction, isObject, ShapeFlags } from "@mini/shared"
 import { PublicInstanceProxyHandlers } from "./componentPublicInstance"
 //创建一个实例
 export function createComponentInstance(vnode) {

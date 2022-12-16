@@ -1,4 +1,4 @@
-import { hasOwn } from "@mini/share"
+import { hasOwn } from "@mini/shared"
 
 export const PublicInstanceProxyHandlers = {
     get({ _: instance }, key) {
