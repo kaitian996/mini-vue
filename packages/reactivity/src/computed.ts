@@ -8,7 +8,7 @@ export function computed(getter: Function) {
         scheduler() {
             if (!dirty) {
                 dirty = true;
-                trigger(obj, 'value',)
+                trigger(obj, 'value')
             }
         }
     });
